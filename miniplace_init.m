@@ -44,7 +44,13 @@ switch lower(opts.weightInitMethod)
 end
 net.layers{end+1} = struct('type', 'softmaxloss', 'name', 'loss') ;
 
-net.normalization.border = 256 - net.normalization.imageSize(1:2) ;
+switch opts.model
+    case 'alexnet2'
+        net.normalization.border = 128 - net.normalization.imageSize(1:2) ;
+    otherwise
+        net.normalization.border = 256 - net.normalization.imageSize(1:2) ;
+end
+
 net.normalization.interpolation = 'bicubic' ;
 net.normalization.averageImage = [] ;
 net.normalization.keepAspect = true ;

@@ -7,7 +7,7 @@ run(fullfile(fileparts(mfilename('fullpath')), ...
   '..','matconvnet-1.0-beta16', 'matlab', 'vl_setupnn.m')) ;
 
 opts.dataDir = fullfile(fileparts(mfilename('fullpath')),'data') ;
-opts.modelType = 'alexnet' ;
+opts.modelType = 'alexnet2' ;
 opts.networkType = 'simplenn' ;
 opts.batchNormalization = true ; %false
 opts.weightInitMethod = 'xavierimproved' ;
