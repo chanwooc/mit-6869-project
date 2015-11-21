@@ -7,10 +7,10 @@ run(fullfile(fileparts(mfilename('fullpath')), ...
   '..','matconvnet-1.0-beta16', 'matlab', 'vl_setupnn.m')) ;
 
 opts.dataDir = fullfile(fileparts(mfilename('fullpath')),'data') ;
-opts.modelType = 'alexnet2' ;
+opts.modelType = 'alexnet' ;
 opts.networkType = 'simplenn' ;
-opts.batchNormalization = false ;
-opts.weightInitMethod = 'gaussian' ;
+opts.batchNormalization = true ; %false
+opts.weightInitMethod = 'xavierimproved' ;
 [opts, varargin] = vl_argparse(opts, varargin) ;
 
 sfx = opts.modelType ;
@@ -94,6 +94,9 @@ end
 bopts.transformation = 'stretch' ;
 bopts.averageImage = rgbMean ;
 bopts.rgbVariance = 0.1*sqrt(d)*v' ;
+
+bopts.numAugments = 1;
+
 useGpu = numel(opts.train.gpus) > 0 ;
 
 switch lower(opts.networkType)
@@ -117,7 +120,9 @@ function [im,labels] = getBatchSimpleNN(imdb, batch, opts)
 images = strcat([imdb.imageDir filesep], imdb.images.name(batch)) ;
 im = miniplace_get_batch(images, opts, ...
                             'prefetch', nargout == 0) ;
-labels = imdb.images.label(batch) ;
+if isfield(opts,'numAugments')
+    labels = kron(imdb.images.label(batch), ones(1, opts.numAugments)) ;
+end
 
 % -------------------------------------------------------------------------
 function fn = getBatchDagNNWrapper(opts, useGpu)

@@ -6,13 +6,13 @@ dataDir = fullfile(fileparts(mfilename('fullpath')), '..', 'data') ;
 
 load(fullfile(fileparts(mfilename('fullpath')),'miniCategoryIdx.mat'));
 trainIdx = load(fullfile(fileparts(mfilename('fullpath')),'trainIdx.mat'));
-valIdx = load(fullfile(fileparts(mfilename('fullpath')),'trainIdx.mat'));
+valIdx = load(fullfile(fileparts(mfilename('fullpath')),'valIdx.mat'));
 
 imdb.classes.name = {miniCategoryIdx{:,1}} ;
 imdb.classes.category = [miniCategoryIdx{:,2}] ;
 imdb.imageDir = fullfile(dataDir, 'images') ;
 
-% -------------------------------------------------------------------------
+%% -------------------------------------------------------------------------
 %                                                         Train images
 % -------------------------------------------------------------------------
 names = trainIdx.filename' ;
@@ -25,7 +25,7 @@ imdb.images.name = names ;
 imdb.images.set = ones(1, numel(names)) ;
 imdb.images.label = labels ;
 
-% -------------------------------------------------------------------------
+%% -------------------------------------------------------------------------
 %                                                         Validation images
 % -------------------------------------------------------------------------
 names = valIdx.filename' ;
@@ -38,7 +38,7 @@ imdb.images.name = horzcat(imdb.images.name, names) ;
 imdb.images.set = horzcat(imdb.images.set, 2*ones(1,numVal)) ;
 imdb.images.label = horzcat(imdb.images.label, labels) ;
 
-% -------------------------------------------------------------------------
+%% -------------------------------------------------------------------------
 %                                                               Test images
 % -------------------------------------------------------------------------
 

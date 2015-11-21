@@ -3,6 +3,9 @@ function imo = miniplace_get_batch(images, varargin)
 
 opts.imageSize = [128, 128] ;
 opts.border = [15, 15] ;
+% opts.imageSize = [256, 256] ;
+% opts.border = [29, 29] ;
+
 opts.keepAspect = true ;
 opts.numAugments = 1 ;
 opts.transformation = 'none' ;

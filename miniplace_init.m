@@ -6,7 +6,7 @@ opts.initBias = 0.1 ;
 opts.weightDecay = 1 ;
 %opts.weightInitMethod = 'xavierimproved' ;
 opts.weightInitMethod = 'gaussian' ;
-opts.model = 'alexnet' ;
+opts.model = 'alexnet2' ;
 opts.batchNormalization = false ;
 opts = vl_argparse(opts, varargin) ;
 
@@ -44,7 +44,7 @@ switch lower(opts.weightInitMethod)
 end
 net.layers{end+1} = struct('type', 'softmaxloss', 'name', 'loss') ;
 
-net.normalization.border = 128 - net.normalization.imageSize(1:2) ;
+net.normalization.border = 256 - net.normalization.imageSize(1:2) ;
 net.normalization.interpolation = 'bicubic' ;
 net.normalization.averageImage = [] ;
 net.normalization.keepAspect = true ;
