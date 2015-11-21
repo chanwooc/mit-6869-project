@@ -39,6 +39,7 @@ opts.errorFunction = 'multiclass' ;
 opts.errorLabels = {} ;
 opts.plotDiagnostics = false ;
 opts.memoryMapFile = fullfile(tempdir, 'matconvnet.bin') ;
+opts.numAugments = 1;
 opts = vl_argparse(opts, varargin) ;
 
 if ~exist(opts.expDir, 'dir'), mkdir(opts.expDir) ; end
@@ -312,6 +313,11 @@ for t=1:opts.batchSize:numel(subset)
   stats = sum([stats,[0 ; error]],2); % works even when stats=[]
   stats(1) = time ;
   n = (t + batchSize - 1) / max(1,numlabs) ;
+
+  if isfield(opts,'numAugments')
+      n = n * opts.numAugments;
+  end
+ 
   speed = n/time ;
   fprintf('%.1f Hz%s\n', speed) ;
 
