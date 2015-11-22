@@ -18,6 +18,9 @@ switch opts.model
   case 'alexnet2'
     net.normalization.imageSize = [113, 113, 3] ;
     net = alexnet2(net, opts) ;
+  case 'alexnet3'
+    net.normalization.imageSize = [116, 116, 3] ;
+    net = alexnet3(net, opts);
   case 'vgg-f'
     net.normalization.imageSize = [224, 224, 3] ;
     net = vgg_f(net, opts) ;
@@ -46,6 +49,8 @@ net.layers{end+1} = struct('type', 'softmaxloss', 'name', 'loss') ;
 
 switch opts.model
     case 'alexnet2'
+        net.normalization.border = 128 - net.normalization.imageSize(1:2) ;
+    case 'alexnet3'
         net.normalization.border = 128 - net.normalization.imageSize(1:2) ;
     otherwise
         net.normalization.border = 256 - net.normalization.imageSize(1:2) ;
@@ -205,6 +210,48 @@ net = add_block(net, opts, '8', 1, 1, 4096, 100, 1, 0) ;
 net.layers(end) = [] ;
 if opts.batchNormalization, net.layers(end) = [] ; end
 
+% --------------------------------------------------------------------
+function net = alexnet3(net, opts)
+% --------------------------------------------------------------------
+
+net.layers = {} ;
+
+net = add_block(net, opts, '1', 8, 8, 3, 64, 2, 0) ;
+net = add_norm(net, opts, '1') ;
+net.layers{end+1} = struct('type', 'pool', 'name', 'pool1', ...
+                           'method', 'max', ...
+                           'pool', [3 3], ...
+                           'stride', 2, ...
+                           'pad', 0) ;
+
+
+net = add_block(net, opts, '2', 5, 5, 32, 192, 1, 2) ;
+net = add_norm(net, opts, '2') ;
+net.layers{end+1} = struct('type', 'pool', 'name', 'pool2', ...
+                           'method', 'max', ...
+                           'pool', [3 3], ...
+                           'stride', 2, ...
+                           'pad', 0) ;
+
+
+net = add_block(net, opts, '3', 3, 3, 192, 256, 1, 1) ;
+net = add_block(net, opts, '4', 3, 3, 128, 256, 1, 1) ;
+net = add_block(net, opts, '5', 3, 3, 128, 192, 1, 1) ;
+net.layers{end+1} = struct('type', 'pool', 'name', 'pool5', ...
+                           'method', 'max', ...
+                           'pool', [3 3], ...
+                           'stride', 2, ...
+                           'pad', 0) ;
+
+net = add_block(net, opts, '6', 6, 6, 192, 2048, 1, 0) ;
+net = add_dropout(net, opts, '6') ;
+
+net = add_block(net, opts, '7', 1, 1, 2048, 2048, 1, 0) ;
+net = add_dropout(net, opts, '7') ;
+
+net = add_block(net, opts, '8', 1, 1, 2048, 100, 1, 0) ;
+net.layers(end) = [] ;
+if opts.batchNormalization, net.layers(end) = [] ; end
 
 % --------------------------------------------------------------------
 function net = vgg_s(net, opts)
@@ -242,7 +289,7 @@ net = add_dropout(net, opts, '6') ;
 net = add_block(net, opts, '7', 1, 1, 4096, 4096, 1, 0) ;
 net = add_dropout(net, opts, '7') ;
 
-net = add_block(net, opts, '8', 1, 1, 4096, 1000, 1, 0) ;
+net = add_block(net, opts, '8', 1, 1, 4096, 100, 1, 0) ; %1000->100
 net.layers(end) = [] ;
 if opts.batchNormalization, net.layers(end) = [] ; end
 
@@ -282,7 +329,7 @@ net = add_dropout(net, opts, '6') ;
 net = add_block(net, opts, '7', 1, 1, 4096, 4096, 1, 0) ;
 net = add_dropout(net, opts, '7') ;
 
-net = add_block(net, opts, '8', 1, 1, 4096, 1000, 1, 0) ;
+net = add_block(net, opts, '8', 1, 1, 4096, 100, 1, 0) ; %1000->100
 net.layers(end) = [] ;
 if opts.batchNormalization, net.layers(end) = [] ; end
 
