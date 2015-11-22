@@ -12,8 +12,8 @@ opts.dataDir = fullfile(fileparts(mfilename('fullpath')),'data') ;
 opts.modelType = 'alexnet2' ;
 opts.networkType = 'simplenn' ;
 opts.batchNormalization = false ; %false
-%opts.weightInitMethod = 'gaussian';
-opts.weightInitMethod = 'xavierimproved' ;
+opts.weightInitMethod = 'gaussian';
+%opts.weightInitMethod = 'xavierimproved' ;
 [opts, varargin] = vl_argparse(opts, varargin) ;
 
 sfx = opts.modelType ;
