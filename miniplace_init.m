@@ -201,7 +201,7 @@ net = add_dropout(net, opts, '6') ;
 net = add_block(net, opts, '7', 1, 1, 4096, 4096, 1, 0) ;
 net = add_dropout(net, opts, '7') ;
 
-net = add_block(net, opts, '8', 1, 1, 4096, 1000, 1, 0) ;
+net = add_block(net, opts, '8', 1, 1, 4096, 100, 1, 0) ;
 net.layers(end) = [] ;
 if opts.batchNormalization, net.layers(end) = [] ; end
 
@@ -392,3 +392,4 @@ net = add_dropout(net, opts, '7') ;
 net = add_block(net, opts, '8', 1, 1, 4096, 1000, 1, 0) ;
 net.layers(end) = [] ;
 if opts.batchNormalization, net.layers(end) = [] ; end
+
