@@ -22,7 +22,7 @@ opts.expDir = fullfile('data', sprintf('miniplace-%s-%s', ...
 opts.numFetchThreads = 12 ; %12
 opts.lite = false ;
 opts.imdbPath = fullfile(opts.expDir, 'imdb.mat');
-opts.train.batchSize = 32 ;%256
+opts.train.batchSize = 64 ;%256
 opts.train.numSubBatches = 1 ;
 opts.train.continue = true ;
 opts.train.gpus = [1] ;
@@ -95,8 +95,8 @@ bopts.transformation = 'stretch' ;
 bopts.averageImage = rgbMean ;
 bopts.rgbVariance = 0.1*sqrt(d)*v' ;
 
-bopts.numAugments = 8;
-opts.train.numAugments = 8;
+bopts.numAugments = 4;
+opts.train.numAugments = bopts.numAugments;
 
 useGpu = numel(opts.train.gpus) > 0 ;
 
