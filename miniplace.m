@@ -6,8 +6,10 @@ function miniplace(varargin)
 run(fullfile(fileparts(mfilename('fullpath')), ...
   '..','matconvnet-1.0-beta16', 'matlab', 'vl_setupnn.m')) ;
 
-NUM_AUGMENTS = 1;
-LOW_LR = true;
+NUM_AUGMENTS = 1 ;
+AUG_METHOD = 'f25' ; % 'stretch'
+LOW_LR = false;
+
 
 opts.dataDir = fullfile(fileparts(mfilename('fullpath')),'data') ;
 opts.modelType = 'alexnet3' ;
@@ -21,8 +23,8 @@ sfx = opts.modelType ;
 if opts.batchNormalization, sfx = [sfx '-bnorm'] ; end
 if LOW_LR, sfx = [sfx '-lowlr'] ; end
 
-opts.expDir = fullfile('data', sprintf('%s-%s-aug%d', ...
-                                       sfx, opts.weightInitMethod, NUM_AUGMENTS)) ;
+opts.expDir = fullfile('data', sprintf('%s-%s-%d-aug%d-%s', ...
+                       sfx, opts.weightInitMethod, BATCH_SIZE, NUM_AUGMENTS, AUG_METHOD)) ;
 [opts, varargin] = vl_argparse(opts, varargin) ;
 
 opts.numFetchThreads = 12 ; %12
@@ -41,6 +43,7 @@ if ~opts.batchNormalization
         opts.train.learningRate = logspace(-3, -4, 60) ; % -2 => -3
     else
         opts.train.learningRate = logspace(-2, -4, 60) ;
+    end
 else
   opts.train.learningRate = logspace(-1, -4, 20) ;
 end
@@ -100,7 +103,7 @@ end
 % -------------------------------------------------------------------------
 
 [v,d] = eig(rgbCovariance) ;
-bopts.transformation = 'stretch' ;
+bopts.transformation = AUG_METHOD ;
 bopts.averageImage = rgbMean ;
 bopts.rgbVariance = 0.1*sqrt(d)*v' ;
 
