@@ -6,10 +6,11 @@ function miniplace(varargin)
 run(fullfile(fileparts(mfilename('fullpath')), ...
   '..','matconvnet-1.0-beta16', 'matlab', 'vl_setupnn.m')) ;
 
-NUM_AUGMENTS = 2;
+NUM_AUGMENTS = 1;
+LOW_LR = true;
 
 opts.dataDir = fullfile(fileparts(mfilename('fullpath')),'data') ;
-opts.modelType = 'alexnet4' ;
+opts.modelType = 'alexnet3' ;
 opts.networkType = 'simplenn' ;
 opts.batchNormalization = false ; %false
 opts.weightInitMethod = 'gaussian';
@@ -18,6 +19,8 @@ opts.weightInitMethod = 'gaussian';
 
 sfx = opts.modelType ;
 if opts.batchNormalization, sfx = [sfx '-bnorm'] ; end
+if LOW_LR, sfx = [sfx '-lowlr'] ; end
+
 opts.expDir = fullfile('data', sprintf('%s-%s-aug%d', ...
                                        sfx, opts.weightInitMethod, NUM_AUGMENTS)) ;
 [opts, varargin] = vl_argparse(opts, varargin) ;
@@ -25,7 +28,7 @@ opts.expDir = fullfile('data', sprintf('%s-%s-aug%d', ...
 opts.numFetchThreads = 12 ; %12
 opts.lite = false ;
 opts.imdbPath = fullfile(opts.expDir, 'imdb.mat');
-opts.train.batchSize = 128 ;%256
+opts.train.batchSize = 256 ;%256
 opts.train.numSubBatches = 1 ;
 opts.train.continue = true ;
 opts.train.gpus = [1] ;
@@ -34,7 +37,10 @@ opts.train.sync = false ;
 opts.train.cudnn = true ;
 opts.train.expDir = opts.expDir ;
 if ~opts.batchNormalization
-  opts.train.learningRate = logspace(-3, -4, 60) ; % -2 => -3
+    if LOW_LR
+        opts.train.learningRate = logspace(-3, -4, 60) ; % -2 => -3
+    else
+        opts.train.learningRate = logspace(-2, -4, 60) ;
 else
   opts.train.learningRate = logspace(-1, -4, 20) ;
 end
@@ -98,8 +104,10 @@ bopts.transformation = 'stretch' ;
 bopts.averageImage = rgbMean ;
 bopts.rgbVariance = 0.1*sqrt(d)*v' ;
 
-bopts.numAugments = NUM_AUGMENTS;
-opts.train.numAugments = bopts.numAugments;
+if NUM_AUGMENTS > 1
+    bopts.numAugments = NUM_AUGMENTS;
+    opts.train.numAugments = bopts.numAugments;
+end
 
 useGpu = numel(opts.train.gpus) > 0 ;
 
