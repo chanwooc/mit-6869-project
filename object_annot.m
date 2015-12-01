@@ -3,7 +3,7 @@ function object_annot(varargin)
   run(fullfile(fileparts(mfilename('fullpath')), ...
     '..', 'matconvnet-1.0-beta16', 'matlab', 'vl_setupnn.m'));
 
-  NUM_AUGMENTS = 4;
+  NUM_AUGMENTS = 1;
 
   opts.dataDir = fullfile(fileparts(mfilename('fullpath')), 'data');
   opts.batchNormalization = false;
