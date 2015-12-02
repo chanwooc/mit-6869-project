@@ -1,6 +1,9 @@
 function imdb = object_setup_imdb()
 
   addpath ../development_kit/util
+  
+%   imdb.imageDir = fullfile('..', 'data', 'images') ;
+  imdb.imageDir = fullfile('.');
 
   %% ----------------------------------------------------------------------
   %                                                       Train images
@@ -17,8 +20,10 @@ function imdb = object_setup_imdb()
   for t = trainData
     name = t{1,1};
     rec = VOCreadxml(name);
+    imFilename = strrep(name, 'xml', 'jpg');
+    imFilename = strrep(imFilename, 'objects', 'images');
     if isfield(rec, 'objects')
-      names = [names t];
+      names = [names cellstr(imFilename)];
       labels = [labels getLabel(rec.objects.class)];
     end
   end
