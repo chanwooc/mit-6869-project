@@ -53,7 +53,7 @@ function net = miniplace_init(varargin)
   net.layers{end+1} = struct('type', 'softmaxloss', 'name', 'loss') ;
 
   switch opts.model
-      case {'alexnet2', 'alexnet3', 'alexnet4'}
+      case {'alexnet2', 'alexnet3', 'alexnet4', 'vgg-s2'}
           net.normalization.border = 128 - net.normalization.imageSize(1:2) ;
       otherwise
           net.normalization.border = 256 - net.normalization.imageSize(1:2) ;
