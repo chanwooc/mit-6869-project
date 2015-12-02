@@ -6,26 +6,32 @@ function miniplace(varargin)
 run(fullfile(fileparts(mfilename('fullpath')), ...
   '..','matconvnet', 'matlab', 'vl_setupnn.m')) ;
 
-NUM_AUGMENTS = 4;
+NUM_AUGMENTS = 1 ;
+AUG_METHOD = 'f25' ; % 'stretch'
+BATCH_SIZE = 256;
+LOW_LR = false;
+
 
 opts.dataDir = fullfile(fileparts(mfilename('fullpath')),'data') ;
-opts.modelType = 'alexnet2' ;
+opts.modelType = 'alexnet3' ;
 opts.networkType = 'simplenn' ;
 opts.batchNormalization = false ; %false
-%opts.weightInitMethod = 'gaussian';
-opts.weightInitMethod = 'xavierimproved' ;
+opts.weightInitMethod = 'gaussian';
+%opts.weightInitMethod = 'xavierimproved' ;
 [opts, varargin] = vl_argparse(opts, varargin) ;
 
 sfx = opts.modelType ;
 if opts.batchNormalization, sfx = [sfx '-bnorm'] ; end
-opts.expDir = fullfile('data', sprintf('miniplace-%s-%s', ...
-                                       sfx, opts.networkType)) ;
+if LOW_LR, sfx = [sfx '-lowlr'] ; end
+
+opts.expDir = fullfile('data', sprintf('%s-%s-%d-aug%d-%s', ...
+                       sfx, opts.weightInitMethod, BATCH_SIZE, NUM_AUGMENTS, AUG_METHOD)) ;
 [opts, varargin] = vl_argparse(opts, varargin) ;
 
 opts.numFetchThreads = 12 ; %12
 opts.lite = false ;
 opts.imdbPath = fullfile(opts.expDir, 'imdb.mat');
-opts.train.batchSize = 64 ;%256
+opts.train.batchSize = BATCH_SIZE ;%256
 opts.train.numSubBatches = 1 ;
 opts.train.continue = true ;
 opts.train.gpus = [] ;
@@ -34,7 +40,11 @@ opts.train.sync = false ;
 opts.train.cudnn = true ;
 opts.train.expDir = opts.expDir ;
 if ~opts.batchNormalization
-  opts.train.learningRate = logspace(-2, -4, 60) ;
+    if LOW_LR
+        opts.train.learningRate = logspace(-3, -4, 60) ; % -2 => -3
+    else
+        opts.train.learningRate = logspace(-2, -4, 60) ;
+    end
 else
   opts.train.learningRate = logspace(-1, -4, 20) ;
 end
@@ -94,12 +104,14 @@ end
 % -------------------------------------------------------------------------
 
 [v,d] = eig(rgbCovariance) ;
-bopts.transformation = 'stretch' ;
+bopts.transformation = AUG_METHOD ;
 bopts.averageImage = rgbMean ;
 bopts.rgbVariance = 0.1*sqrt(d)*v' ;
 
-bopts.numAugments = NUM_AUGMENTS;
-opts.train.numAugments = bopts.numAugments;
+if NUM_AUGMENTS > 1
+    bopts.numAugments = NUM_AUGMENTS;
+    opts.train.numAugments = bopts.numAugments;
+end
 
 useGpu = numel(opts.train.gpus) > 0 ;
 
