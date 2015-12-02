@@ -33,7 +33,7 @@ function net = miniplace_init(varargin)
       net.normalization.imageSize = [224, 224, 3] ;
       net = vgg_s(net, opts) ;
     case 'vgg-s2'
-      net.normalization.imageSize = [224, 224, 3] ;
+      net.normalization.imageSize = [115, 115, 3] ;
       net = vgg_s2(net, opts) ;
     case 'vgg-vd-16'
       net.normalization.imageSize = [224, 224, 3] ;
