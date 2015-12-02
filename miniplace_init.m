@@ -32,6 +32,9 @@ function net = miniplace_init(varargin)
     case 'vgg-s'
       net.normalization.imageSize = [224, 224, 3] ;
       net = vgg_s(net, opts) ;
+    case 'vgg-s2'
+      net.normalization.imageSize = [224, 224, 3] ;
+      net = vgg_s2(net, opts) ;
     case 'vgg-vd-16'
       net.normalization.imageSize = [224, 224, 3] ;
       net = vgg_vd(net, opts) ;
@@ -104,7 +107,7 @@ function weights = init_weight(opts, h, w, in, out, type)
   end
 end
 
-function net = add_fc(net, name, size, stride, pad)
+function net = add_pool(net, name, size, stride, pad)
   net.layers{end+1} = struct('type', 'pool', ...
                              'name', sprintf('pool%s', name), ...
                              'method', 'max', ...
@@ -135,16 +138,16 @@ function net = alexnet(net, opts)
 
   net = add_block(net, opts, '1', 11, 11, 3, 96, 4, 0) ;
   net = add_norm(net, opts, '1') ;
-  net = add_fc(net, '1', 3, 2, 0);
+  net = add_pool(net, '1', 3, 2, 0);
 
   net = add_block(net, opts, '2', 5, 5, 48, 256, 1, 2) ;
   net = add_norm(net, opts, '2') ;
-  net = add_fc(net, '2', 3, 2, 0);
+  net = add_pool(net, '2', 3, 2, 0);
 
   net = add_block(net, opts, '3', 3, 3, 256, 384, 1, 1) ;
   net = add_block(net, opts, '4', 3, 3, 192, 384, 1, 1) ;
   net = add_block(net, opts, '5', 3, 3, 192, 256, 1, 1) ;
-  net = add_fc(net, '3', 3, 2, 0);
+  net = add_pool(net, '3', 3, 2, 0);
 
   net = add_block(net, opts, '6', 6, 6, 256, 4096, 1, 0) ;
   net = add_dropout(net, opts, '6') ;
@@ -163,16 +166,16 @@ function net = alexnet2(net, opts)
 
   net = add_block(net, opts, '1', 5, 5, 3, 96, 2, 0) ;
   net = add_norm(net, opts, '1') ;
-  net = add_fc(net, '1', 3, 2, 0);
+  net = add_pool(net, '1', 3, 2, 0);
 
   net = add_block(net, opts, '2', 5, 5, 48, 256, 1, 2) ;
   net = add_norm(net, opts, '2') ;
-  net = add_fc(net, '2', 3, 2, 0);
+  net = add_pool(net, '2', 3, 2, 0);
 
   net = add_block(net, opts, '3', 3, 3, 256, 384, 1, 1) ;
   net = add_block(net, opts, '4', 3, 3, 192, 384, 1, 1) ;
   net = add_block(net, opts, '5', 3, 3, 192, 256, 1, 1) ;
-  net = add_fc(net, '3', 3, 2, 0);
+  net = add_pool(net, '3', 3, 2, 0);
 
   net = add_block(net, opts, '6', 6, 6, 256, 4096, 1, 0) ;
   net = add_dropout(net, opts, '6') ;
@@ -191,16 +194,16 @@ function net = alexnet3(net, opts)
 
   net = add_block(net, opts, '1', 8, 8, 3, 64, 2, 0) ;
   net = add_norm(net, opts, '1') ;
-  net = add_fc(net, '1', 3, 2, 0);
+  net = add_pool(net, '1', 3, 2, 0);
 
   net = add_block(net, opts, '2', 5, 5, 32, 192, 1, 2) ;
   net = add_norm(net, opts, '2') ;
-  net = add_fc(net, '2', 3, 2, 0);
+  net = add_pool(net, '2', 3, 2, 0);
 
   net = add_block(net, opts, '3', 3, 3, 192, 256, 1, 1) ;
   net = add_block(net, opts, '4', 3, 3, 128, 256, 1, 1) ;
   net = add_block(net, opts, '5', 3, 3, 128, 192, 1, 1) ;
-  net = add_fc(net, '3', 3, 2, 0);
+  net = add_pool(net, '3', 3, 2, 0);
 
   net = add_block(net, opts, '6', 6, 6, 192, 2048, 1, 0) ;
   net = add_dropout(net, opts, '6') ;
@@ -219,15 +222,15 @@ function net = alexnet4(net, opts)
 
   net = add_block(net, opts, '1', 7, 7, 3, 64, 2, 0) ;
   net = add_norm(net, opts, '1') ;
-  net = add_fc(net, '1', 3, 2, 0);
+  net = add_pool(net, '1', 3, 2, 0);
 
   net = add_block(net, opts, '2', 5, 5, 32, 128, 1, 2) ;
   net = add_norm(net, opts, '2') ;
-  net = add_fc(net, '2', 3, 2, 0);
+  net = add_pool(net, '2', 3, 2, 0);
 
   net = add_block(net, opts, '3', 3, 3, 128, 192, 1, 1) ;
   net = add_block(net, opts, '4', 3, 3, 96, 128, 1, 1) ;
-  net = add_fc(net, '3', 3, 2, 0);
+  net = add_pool(net, '3', 3, 2, 0);
 
   net = add_block(net, opts, '5', 6, 6, 128, 1024, 1, 0) ;
   net = add_dropout(net, opts, '5') ;
@@ -279,12 +282,51 @@ function net = vgg_s(net, opts)
   if opts.batchNormalization, net.layers(end) = [] ; end
 end
 
+function net = vgg_s2(net, opts)
+
+  net.layers = {} ;
+  net = add_block(net, opts, '1', 7, 7, 3, 96, 2, 0) ;
+  net = add_norm(net, opts, '1') ;
+  net.layers{end+1} = struct('type', 'pool', 'name', 'pool1', ...
+                             'method', 'max', ...
+                             'pool', [2 2], ...
+                             'stride', 2, ...
+                             'pad', [0 1 0 1]) ;
+
+  net = add_block(net, opts, '2', 5, 5, 96, 256, 1, 0) ;
+  net = add_norm(net, opts, '2') ;
+  net.layers{end+1} = struct('type', 'pool', 'name', 'pool2', ...
+                             'method', 'max', ...
+                             'pool', [2 2], ...
+                             'stride', 2, ...
+                             'pad', [0 1 0 1]) ;
+
+  net = add_block(net, opts, '3', 3, 3, 256, 512, 1, 1) ;
+  net = add_block(net, opts, '4', 3, 3, 512, 512, 1, 1) ;
+  net = add_block(net, opts, '5', 3, 3, 512, 512, 1, 1) ;
+  net.layers{end+1} = struct('type', 'pool', 'name', 'pool5', ...
+                             'method', 'max', ...
+                             'pool', [3 3], ...
+                             'stride', 3, ...
+                             'pad', [0 1 0 1]) ;
+
+  net = add_block(net, opts, '6', 6, 6, 512, 4096, 1, 0) ;
+  net = add_dropout(net, opts, '6') ;
+
+  net = add_block(net, opts, '7', 1, 1, 4096, 4096, 1, 0) ;
+  net = add_dropout(net, opts, '7') ;
+
+  net = add_block(net, opts, '8', 1, 1, 4096, 100, 1, 0) ; %1000->100
+  net.layers(end) = [] ;
+  if opts.batchNormalization, net.layers(end) = [] ; end
+end
+
 function net = vgg_m(net, opts)
 
   net.layers = {} ;
   net = add_block(net, opts, '1', 7, 7, 3, 96, 2, 0) ;
   net = add_norm(net, opts, '1') ;
-  net = add_fc(net, '1', 3, 2, 0);
+  net = add_pool(net, '1', 3, 2, 0);
 
   net = add_block(net, opts, '2', 5, 5, 96, 256, 2, 1) ;
   net = add_norm(net, opts, '2') ;
@@ -297,7 +339,7 @@ function net = vgg_m(net, opts)
   net = add_block(net, opts, '3', 3, 3, 256, 512, 1, 1) ;
   net = add_block(net, opts, '4', 3, 3, 512, 512, 1, 1) ;
   net = add_block(net, opts, '5', 3, 3, 512, 512, 1, 1) ;
-  net = add_fc(net, '3', 3, 2, 0);
+  net = add_pool(net, '3', 3, 2, 0);
 
   net = add_block(net, opts, '6', 6, 6, 512, 4096, 1, 0) ;
   net = add_dropout(net, opts, '6') ;
@@ -323,12 +365,12 @@ function net = vgg_f(net, opts)
 
   net = add_block(net, opts, '2', 5, 5, 64, 256, 1, 2) ;
   net = add_norm(net, opts, '2') ;
-  net = add_fc(net, '2', 3, 2, 0);
+  net = add_pool(net, '2', 3, 2, 0);
 
   net = add_block(net, opts, '3', 3, 3, 256, 256, 1, 1) ;
   net = add_block(net, opts, '4', 3, 3, 256, 256, 1, 1) ;
   net = add_block(net, opts, '5', 3, 3, 256, 256, 1, 1) ;
-  net = add_fc(net, '3', 3, 2, 0);
+  net = add_pool(net, '3', 3, 2, 0);
 
   net = add_block(net, opts, '6', 6, 6, 256, 4096, 1, 0) ;
   net = add_dropout(net, opts, '6') ;
@@ -346,11 +388,11 @@ function net = vgg_vd(net, opts)
   net.layers = {} ;
   net = add_block(net, opts, '1_1', 3, 3, 3, 64, 1, 1) ;
   net = add_block(net, opts, '1_2', 3, 3, 64, 64, 1, 1) ;
-  net = add_fc(net, '1', 2, 2, 0);
+  net = add_pool(net, '1', 2, 2, 0);
   
   net = add_block(net, opts, '2_1', 3, 3, 64, 128, 1, 1) ;
   net = add_block(net, opts, '2_2', 3, 3, 128, 128, 1, 1) ;
-  net = add_fc(net, '2', 2, 2, 0);
+  net = add_pool(net, '2', 2, 2, 0);
 
   net = add_block(net, opts, '3_1', 3, 3, 128, 256, 1, 1) ;
   net = add_block(net, opts, '3_2', 3, 3, 256, 256, 1, 1) ;
@@ -358,7 +400,7 @@ function net = vgg_vd(net, opts)
   if strcmp(opts.model, 'vgg-vd-19')
     net = add_block(net, opts, '3_4', 3, 3, 256, 256, 1, 1) ;
   end
-  net = add_fc(net, '3', 2, 2, 0);
+  net = add_pool(net, '3', 2, 2, 0);
 
   net = add_block(net, opts, '4_1', 3, 3, 256, 512, 1, 1) ;
   net = add_block(net, opts, '4_2', 3, 3, 512, 512, 1, 1) ;
@@ -366,7 +408,7 @@ function net = vgg_vd(net, opts)
   if strcmp(opts.model, 'vgg-vd-19')
     net = add_block(net, opts, '4_4', 3, 3, 512, 512, 1, 1) ;
   end
-  net = add_fc(net, '4', 2, 2, 0);
+  net = add_pool(net, '4', 2, 2, 0);
 
   net = add_block(net, opts, '5_1', 3, 3, 512, 512, 1, 1) ;
   net = add_block(net, opts, '5_2', 3, 3, 512, 512, 1, 1) ;
@@ -374,7 +416,7 @@ function net = vgg_vd(net, opts)
   if strcmp(opts.model, 'vgg-vd-19')
     net = add_block(net, opts, '5_4', 3, 3, 512, 512, 1, 1) ;
   end
-  net = add_fc(net, '5', 2, 2, 0);
+  net = add_pool(net, '5', 2, 2, 0);
 
   net = add_block(net, opts, '6', 7, 7, 512, 4096, 1, 0) ;
   net = add_dropout(net, opts, '6') ;
