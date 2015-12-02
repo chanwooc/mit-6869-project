@@ -310,13 +310,13 @@ function net = vgg_s2(net, opts)
                              'stride', 3, ...
                              'pad', [0 1 0 1]) ;
 
-  net = add_block(net, opts, '6', 6, 6, 512, 4096, 1, 0) ;
+  net = add_block(net, opts, '6', 6, 6, 512, 2048, 1, 0) ;
   net = add_dropout(net, opts, '6') ;
 
-  net = add_block(net, opts, '7', 1, 1, 4096, 4096, 1, 0) ;
+  net = add_block(net, opts, '7', 1, 1, 2048, 2048, 1, 0) ;
   net = add_dropout(net, opts, '7') ;
 
-  net = add_block(net, opts, '8', 1, 1, 4096, 100, 1, 0) ; %1000->100
+  net = add_block(net, opts, '8', 1, 1, 2048, 100, 1, 0) ; %1000->100
   net.layers(end) = [] ;
   if opts.batchNormalization, net.layers(end) = [] ; end
 end
