@@ -293,7 +293,7 @@ function net = vgg_s2(net, opts)
                              'stride', 2, ...
                              'pad', [0 1 0 1]) ;
 
-  net = add_block(net, opts, '2', 5, 5, 96, 256, 1, 0) ;
+  net = add_block(net, opts, '2', 5, 5, 96, 128, 1, 0) ;
   net = add_norm(net, opts, '2') ;
   net.layers{end+1} = struct('type', 'pool', 'name', 'pool2', ...
                              'method', 'max', ...
@@ -301,16 +301,16 @@ function net = vgg_s2(net, opts)
                              'stride', 2, ...
                              'pad', [0 1 0 1]) ;
 
-  net = add_block(net, opts, '3', 3, 3, 256, 512, 1, 1) ;
-  net = add_block(net, opts, '4', 3, 3, 512, 512, 1, 1) ;
-  net = add_block(net, opts, '5', 3, 3, 512, 512, 1, 1) ;
+  net = add_block(net, opts, '3', 3, 3, 128, 256, 1, 1) ;
+  net = add_block(net, opts, '4', 3, 3, 256, 256, 1, 1) ;
+  net = add_block(net, opts, '5', 3, 3, 256, 256, 1, 1) ;
   net.layers{end+1} = struct('type', 'pool', 'name', 'pool5', ...
                              'method', 'max', ...
                              'pool', [3 3], ...
                              'stride', 3, ...
                              'pad', [0 1 0 1]) ;
 
-  net = add_block(net, opts, '6', 6, 6, 512, 2048, 1, 0) ;
+  net = add_block(net, opts, '6', 6, 6, 256, 2048, 1, 0) ;
   net = add_dropout(net, opts, '6') ;
 
   net = add_block(net, opts, '7', 1, 1, 2048, 2048, 1, 0) ;
