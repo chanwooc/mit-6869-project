@@ -1,23 +1,4 @@
-function [net, info] = cnn_train(net, imdb, getBatch, varargin)
-%CNN_TRAIN  An example implementation of SGD for training CNNs
-%    CNN_TRAIN() is an example learner implementing stochastic
-%    gradient descent with momentum to train a CNN. It can be used
-%    with different datasets and tasks by providing a suitable
-%    getBatch function.
-%
-%    The function automatically restarts after each training epoch by
-%    checkpointing.
-%
-%    The function supports training on CPU or on one or more GPUs
-%    (specify the list of GPU IDs in the `gpus` option). Multi-GPU
-%    support is relatively primitive but sufficient to obtain a
-%    noticable speedup.
-
-% Copyright (C) 2014-15 Andrea Vedaldi.
-% All rights reserved.
-%
-% This file is part of the VLFeat library and is made available under
-% the terms of the BSD license (see the COPYING file).
+function [net, info] = cnn_train_wo_error_stat(net, imdb, getBatch, varargin)
 
 opts.batchSize = 256 ;
 opts.numSubBatches = 1 ;
@@ -254,7 +235,7 @@ stats = [] ;
 start = tic ;
 
 for t=1:opts.batchSize:numel(subset)
-  fprintf('%s: epoch %02d: batch %3d/%3d: ', mode, epoch, ...
+  fprintf('%s: epoch %02d: batch %3d/%3d: \n', mode, epoch, ...
           fix(t/opts.batchSize)+1, ceil(numel(subset)/opts.batchSize)) ;
   batchSize = min(opts.batchSize, numel(subset) - t + 1) ;
   numDone = 0 ;
@@ -291,12 +272,6 @@ for t=1:opts.batchSize:numel(subset)
                       'backPropDepth', opts.backPropDepth, ...
                       'sync', opts.sync, ...
                       'cudnn', opts.cudnn) ;
-
-    % accumulate training errors
-    error = sum([error, [...
-      sum(double(gather(res(end).x))) ;
-      reshape(opts.errorFunction(opts, labels, res),[],1) ; ]],2) ;
-    numDone = numDone + numel(batch) ;
   end
 
   % gather and accumulate gradients across labs
@@ -311,32 +286,6 @@ for t=1:opts.batchSize:numel(subset)
       labBarrier() ;
       [net,res] = accumulate_gradients(opts, learningRate, batchSize, net, res, mmap) ;
     end
-  end
-
-  % print learning statistics
-
-  time = toc(start) ;
-  stats = sum([stats,[0 ; error]],2); % works even when stats=[]
-  stats(1) = time ;
-  n = (t + batchSize - 1) / max(1,numlabs) ;
-
-  if isfield(opts,'numAugments')
-      n = n * opts.numAugments;
-  end
- 
-  speed = n/time ;
-  fprintf('%.1f Hz%s\n', speed) ;
-
-  fprintf(' obj:%.3g', stats(2)/n) ;
-  for i=1:numel(opts.errorLabels)
-    fprintf(' %s:%.3g', opts.errorLabels{i}, stats(i+2)/n) ;
-  end
-  fprintf(' [%d/%d]', numDone, batchSize);
-  fprintf('\n') ;
-
-  % debug info
-  if opts.plotDiagnostics && numGpus <= 1
-    figure(2) ; vl_simplenn_diagnose(net,res) ; drawnow ;
   end
 end
 

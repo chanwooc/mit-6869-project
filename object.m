@@ -84,7 +84,7 @@ function object(varargin)
   useGpu = numel(opts.train.gpus) > 0;
 
   fn = getBatchSimpleNNWrapper(bopts);
-  [net,info] = cnn_train(net, imdb, fn, opts.train, 'conserveMemory', true);
+  [net,info] = cnn_train_wo_error_stat(net, imdb, fn, opts.train, 'conserveMemory', true);
   
 end
 
