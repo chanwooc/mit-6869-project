@@ -1,6 +1,6 @@
 function object(varargin)
   run(fullfile(fileparts(mfilename('fullpath')), ...
-    '..','matconvnet-1.0-beta16', 'matlab', 'vl_setupnn.m'));
+    '..','matconvnet', 'matlab', 'vl_setupnn.m'));
 
   NUM_AUGMENTS = 1;
 
@@ -16,7 +16,7 @@ function object(varargin)
   opts.numFetchThreads = 12; %12
   opts.lite = false;
   opts.imdbPath = fullfile(opts.expDir, 'object-imdb.mat');
-  opts.train.batchSize = 64;%256
+  opts.train.batchSize = 128;%256
   opts.train.numSubBatches = 1;
   opts.train.continue = true;
   opts.train.gpus = [];

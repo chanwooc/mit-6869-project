@@ -160,9 +160,14 @@ end
 %   labels(:,:,2,:) = [] ;
 % end
 
-error = ~bsxfun(@eq, predictions, labels) ;
-err(1,1) = sum(sum(sum(error(:,:,1,:)))) ;
-err(2,1) = sum(sum(sum(min(error(:,:,1:5,:),[],3)))) ;
+error = ~bsxfun(@eq, reshape(predictions, ...
+                             size(labels, 1), size(labels, 2)), ...
+                labels);
+err = sum(sum(error));
+
+% error = ~bsxfun(@eq, predictions, labels) ;
+% err(1,1) = sum(sum(sum(error(:,:,1,:)))) ;
+% err(2,1) = sum(sum(sum(min(error(:,:,1:5,:),[],3)))) ;
 
 % -------------------------------------------------------------------------
 function  [net_cpu,stats,prof] = process_epoch(opts, getBatch, epoch, subset, learningRate, imdb, net_cpu)
@@ -223,7 +228,12 @@ for t=1:opts.batchSize:numel(subset)
 
     % evaluate CNN
     net.layers{end}.class = labels ;
-    if training, dzdy = one; else, dzdy = [] ; end
+    if training
+      dzdy = one;
+    else
+      dzdy = [];
+    end
+    
     res = vl_simplenn(net, im, dzdy, res, ...
                       'accumulate', s ~= 1, ...
                       'disableDropout', ~training, ...
@@ -233,9 +243,9 @@ for t=1:opts.batchSize:numel(subset)
                       'cudnn', opts.cudnn) ;
 
     % accumulate training errors
+    error_single = error_multiclass(opts, labels, res);
     error = sum([error, [...
-      sum(double(gather(res(end).x))) ;
-      reshape(error_multiclass(opts, labels, res),[],1) ; ]],2) ;
+      sum(sum(double(gather(res(end).x)))); error_single]], 2);
     numDone = numDone + numel(batch) ;
   end
 
