@@ -1,4 +1,23 @@
-function [net, info] = cnn_train_wo_error_stat(net, imdb, getBatch, varargin)
+function [net, info] = cnn_train_for_objects(net, imdb, getBatch, varargin)
+%CNN_TRAIN  An example implementation of SGD for training CNNs
+%    CNN_TRAIN() is an example learner implementing stochastic
+%    gradient descent with momentum to train a CNN. It can be used
+%    with different datasets and tasks by providing a suitable
+%    getBatch function.
+%
+%    The function automatically restarts after each training epoch by
+%    checkpointing.
+%
+%    The function supports training on CPU or on one or more GPUs
+%    (specify the list of GPU IDs in the `gpus` option). Multi-GPU
+%    support is relatively primitive but sufficient to obtain a
+%    noticable speedup.
+
+% Copyright (C) 2014-15 Andrea Vedaldi.
+% All rights reserved.
+%
+% This file is part of the VLFeat library and is made available under
+% the terms of the BSD license (see the COPYING file).
 
 opts.batchSize = 256 ;
 opts.numSubBatches = 1 ;
@@ -16,8 +35,6 @@ opts.prefetch = false ;
 opts.cudnn = true ;
 opts.weightDecay = 0.0005 ;
 opts.momentum = 0.9 ;
-opts.errorFunction = 'multiclass' ;
-% opts.errorFunction = 'binary';
 opts.errorLabels = {} ;
 opts.plotDiagnostics = false ;
 opts.memoryMapFile = fullfile(tempdir, 'matconvnet.bin') ;
@@ -75,22 +92,6 @@ elseif numGpus == 1
 end
 if exist(opts.memoryMapFile), delete(opts.memoryMapFile) ; end
 
-% setup error calculation function
-if isstr(opts.errorFunction)
-  switch opts.errorFunction
-    case 'none'
-      opts.errorFunction = @error_none ;
-    case 'multiclass'
-      opts.errorFunction = @error_multiclass ;
-      if isempty(opts.errorLabels), opts.errorLabels = {'top1e', 'top5e'} ; end
-    case 'binary'
-      opts.errorFunction = @error_binary ;
-      if isempty(opts.errorLabels), opts.errorLabels = {'bine'} ; end
-    otherwise
-      error('Uknown error function ''%s''', opts.errorFunction) ;
-  end
-end
-
 % -------------------------------------------------------------------------
 %                                                        Train and validate
 % -------------------------------------------------------------------------
@@ -138,42 +139,12 @@ for epoch=start+1:opts.numEpochs
     info.(f).error(:,epoch) = stats.(f)(3:end) / n ;
   end
   if ~evaluateMode, save(modelPath(epoch), 'net', 'info') ; end
-
-  figure(1) ; clf ;
-  hasError = isa(opts.errorFunction, 'function_handle') ;
-  subplot(1,1+hasError,1) ;
-  if ~evaluateMode
-    semilogy(1:epoch, info.train.objective, '.-', 'linewidth', 2) ;
-    hold on ;
-  end
-  semilogy(1:epoch, info.val.objective, '.--') ;
-  xlabel('training epoch') ; ylabel('energy') ;
-  grid on ;
-  h=legend(sets) ;
-  set(h,'color','none');
-  title('objective') ;
-  if hasError
-    subplot(1,2,2) ; leg = {} ;
-    if ~evaluateMode
-      plot(1:epoch, info.train.error', '.-', 'linewidth', 2) ;
-      hold on ;
-      leg = horzcat(leg, strcat('train ', opts.errorLabels)) ;
-    end
-    plot(1:epoch, info.val.error', '.--') ;
-    leg = horzcat(leg, strcat('val ', opts.errorLabels)) ;
-    set(legend(leg{:}),'color','none') ;
-    grid on ;
-    xlabel('training epoch') ; ylabel('error') ;
-    title('error') ;
-  end
-  drawnow ;
-  print(1, modelFigPath, '-dpdf') ;
 end
 
 % -------------------------------------------------------------------------
 function err = error_multiclass(opts, labels, res)
 % -------------------------------------------------------------------------
-predictions = gather(res(end-1).x) ;
+predictions = gather(res(end).x) ; % why (end-1) originally?
 [~,predictions] = sort(predictions, 3, 'descend') ;
 
 % be resilient to badly formatted labels
@@ -182,28 +153,16 @@ if numel(labels) == size(predictions, 4)
 end
 
 % skip null labels
-mass = single(labels(:,:,1,:) > 0) ;
-if size(labels,3) == 2
-  % if there is a second channel in labels, used it as weights
-  mass = mass .* labels(:,:,2,:) ;
-  labels(:,:,2,:) = [] ;
-end
+% mass = single(labels(:,:,1,:) > 0) ;
+% if size(labels,3) == 2
+%   % if there is a second channel in labels, used it as weights
+%   mass = mass .* labels(:,:,2,:) ;
+%   labels(:,:,2,:) = [] ;
+% end
 
 error = ~bsxfun(@eq, predictions, labels) ;
-err(1,1) = sum(sum(sum(mass .* error(:,:,1,:)))) ;
-err(2,1) = sum(sum(sum(mass .* min(error(:,:,1:5,:),[],3)))) ;
-
-% -------------------------------------------------------------------------
-function err = error_binaryclass(opts, labels, res)
-% -------------------------------------------------------------------------
-predictions = gather(res(end-1).x) ;
-error = bsxfun(@times, predictions, labels) < 0 ;
-err = sum(error(:)) ;
-
-% -------------------------------------------------------------------------
-function err = error_none(opts, labels, res)
-% -------------------------------------------------------------------------
-err = zeros(0,1) ;
+err(1,1) = sum(sum(sum(error(:,:,1,:)))) ;
+err(2,1) = sum(sum(sum(min(error(:,:,1:5,:),[],3)))) ;
 
 % -------------------------------------------------------------------------
 function  [net_cpu,stats,prof] = process_epoch(opts, getBatch, epoch, subset, learningRate, imdb, net_cpu)
@@ -235,7 +194,7 @@ stats = [] ;
 start = tic ;
 
 for t=1:opts.batchSize:numel(subset)
-  fprintf('%s: epoch %02d: batch %3d/%3d: \n', mode, epoch, ...
+  fprintf('%s: epoch %02d: batch %3d/%3d: ', mode, epoch, ...
           fix(t/opts.batchSize)+1, ceil(numel(subset)/opts.batchSize)) ;
   batchSize = min(opts.batchSize, numel(subset) - t + 1) ;
   numDone = 0 ;
@@ -272,6 +231,12 @@ for t=1:opts.batchSize:numel(subset)
                       'backPropDepth', opts.backPropDepth, ...
                       'sync', opts.sync, ...
                       'cudnn', opts.cudnn) ;
+
+    % accumulate training errors
+    error = sum([error, [...
+      sum(double(gather(res(end).x))) ;
+      reshape(error_multiclass(opts, labels, res),[],1) ; ]],2) ;
+    numDone = numDone + numel(batch) ;
   end
 
   % gather and accumulate gradients across labs
@@ -286,6 +251,32 @@ for t=1:opts.batchSize:numel(subset)
       labBarrier() ;
       [net,res] = accumulate_gradients(opts, learningRate, batchSize, net, res, mmap) ;
     end
+  end
+
+  % print learning statistics
+
+  time = toc(start) ;
+  stats = sum([stats,[0 ; error]],2); % works even when stats=[]
+  stats(1) = time ;
+  n = (t + batchSize - 1) / max(1,numlabs) ;
+
+  if isfield(opts,'numAugments')
+      n = n * opts.numAugments;
+  end
+ 
+  speed = n/time ;
+  fprintf('%.1f Hz%s\n', speed) ;
+
+  fprintf(' obj:%.3g', stats(2)/n) ;
+  for i=1:numel(opts.errorLabels)
+    fprintf(' %s:%.3g', opts.errorLabels{i}, stats(i+2)/n) ;
+  end
+  fprintf(' [%d/%d]', numDone, batchSize);
+  fprintf('\n') ;
+
+  % debug info
+  if opts.plotDiagnostics && numGpus <= 1
+    figure(2) ; vl_simplenn_diagnose(net,res) ; drawnow ;
   end
 end
 

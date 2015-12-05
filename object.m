@@ -78,13 +78,14 @@ function object(varargin)
   bopts.averageImage = rgbMean;
   bopts.rgbVariance = 0.1*sqrt(d)*v';
 
-  bopts.numAugments = NUM_AUGMENTS;
-  opts.train.numAugments = bopts.numAugments;
+%   bopts.numAugments = NUM_AUGMENTS;
+%   opts.train.numAugments = bopts.numAugments;
 
   useGpu = numel(opts.train.gpus) > 0;
 
   fn = getBatchSimpleNNWrapper(bopts);
-  [net,info] = cnn_train_wo_error_stat(net, imdb, fn, opts.train, 'conserveMemory', true);
+  [net,info] = cnn_train_for_objects(net, imdb, fn, opts.train, ...
+                                     'conserveMemory', true);
   
 end
 
@@ -98,7 +99,7 @@ function [im,labels] = getBatchSimpleNN(imdb, batch, opts)
   if isfield(opts,'numAugments')
       labels = kron(imdb.images.label(batch), ones(1, opts.numAugments));
   else
-      labels = imdb.images.label(batch);
+      labels = imdb.images.label(:,batch);
   end
 end
 
