@@ -33,9 +33,8 @@ opts.backPropDepth = +inf ;
 opts.sync = false ;
 opts.prefetch = false ;
 opts.cudnn = true ;
-opts.weightDecay = 0.0005 ;
+opts.weightDecay = 1 ; % 0.0005
 opts.momentum = 0.9 ;
-opts.errorLabels = {} ;
 opts.plotDiagnostics = false ;
 opts.memoryMapFile = fullfile(tempdir, 'matconvnet.bin') ;
 opts.numAugments = 1;
@@ -148,22 +147,11 @@ predictions = gather(res(end).x) ; % why (end-1) originally?
 [~,predictions] = sort(predictions, 3, 'descend') ;
 
 % be resilient to badly formatted labels
-if numel(labels) == size(predictions, 4)
-  labels = reshape(labels,1,1,1,[]) ;
-end
-
-% skip null labels
-% mass = single(labels(:,:,1,:) > 0) ;
-% if size(labels,3) == 2
-%   % if there is a second channel in labels, used it as weights
-%   mass = mass .* labels(:,:,2,:) ;
-%   labels(:,:,2,:) = [] ;
+% if numel(labels) == size(predictions, 4)
+%   labels = reshape(labels,1,1,1,[]) ;
 % end
 
-error = ~bsxfun(@eq, reshape(predictions, ...
-                             size(labels, 1), size(labels, 2)), ...
-                labels);
-err = sum(sum(error));
+err = sum(sum(reshape(predictions, size(labels, 1), size(labels, 2)) - labels));
 
 % error = ~bsxfun(@eq, predictions, labels) ;
 % err(1,1) = sum(sum(sum(error(:,:,1,:)))) ;
@@ -276,11 +264,7 @@ for t=1:opts.batchSize:numel(subset)
  
   speed = n/time ;
   fprintf('%.1f Hz%s\n', speed) ;
-
-  fprintf(' obj:%.3g', stats(2)/n) ;
-  for i=1:numel(opts.errorLabels)
-    fprintf(' %s:%.3g', opts.errorLabels{i}, stats(i+2)/n) ;
-  end
+  fprintf(' / n: %.3g / error:%.3g', n, error(2)) ;
   fprintf(' [%d/%d]', numDone, batchSize);
   fprintf('\n') ;
 

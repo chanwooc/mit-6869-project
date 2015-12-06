@@ -1,7 +1,7 @@
 function net = object_init(varargin)
 
   % General options
-  opts.scale = 1 ;
+  opts.scale = 100 ;
   opts.weightDecay = 1 ;
   %opts.weightInitMethod = 'xavierimproved' ;
   opts.weightInitMethod = 'gaussian' ;

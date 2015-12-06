@@ -6,8 +6,8 @@ function object(varargin)
 
   opts.dataDir = fullfile(fileparts(mfilename('fullpath')),'data');
   opts.batchNormalization = false;
-  %opts.weightInitMethod = 'gaussian';
-  opts.weightInitMethod = 'xavierimproved';
+  opts.weightInitMethod = 'gaussian';
+%   opts.weightInitMethod = 'xavierimproved';
   [opts, varargin] = vl_argparse(opts, varargin);
 
   opts.expDir = fullfile('data', 'object');
@@ -16,7 +16,7 @@ function object(varargin)
   opts.numFetchThreads = 12; %12
   opts.lite = false;
   opts.imdbPath = fullfile(opts.expDir, 'object-imdb.mat');
-  opts.train.batchSize = 128;%256
+  opts.train.batchSize = 64;%256
   opts.train.numSubBatches = 1;
   opts.train.continue = true;
   opts.train.gpus = [];
