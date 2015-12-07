@@ -68,11 +68,13 @@ end
 
 function label = getLabel(varargin)
   LABEL_SIZE = 175;
-  label = zeros(LABEL_SIZE, 1);
+  candidates = zeros(LABEL_SIZE, 1);
   for var = varargin
-    label(str2double(var{1,1}) + 1) = ...
-      label(str2double(var{1,1}) + 1) + 1; % matlab index
+    candidates(str2double(var{1,1}) + 1) = ...
+      candidates(str2double(var{1,1}) + 1) + 1; % matlab index
   end
+  
+  [~, label] = max(candidates);
 end
 
 function fileList = getAllFiles(dirName)

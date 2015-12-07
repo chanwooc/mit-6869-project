@@ -11,6 +11,7 @@ function net = object_init(varargin)
   % Define layers
   net.normalization.imageSize = [115, 115, 3] ;
   net = alexnet_object(net, opts); % NOTE: NO softmax
+  net.layers{end+1} = struct('type', 'softmaxloss', 'name', 'loss') ;
 
   net.normalization.border = 128 - net.normalization.imageSize(1:2) ;
 
@@ -112,6 +113,6 @@ function net = alexnet_object(net, opts)
   net = add_dropout(net, opts, '6') ;
 
   net = add_block(net, opts, '7', 1, 1, 1024, LABEL_SIZE, 1, 0) ;
-%   net.layers(end) = [] ;
+  net.layers(end) = [] ;
   if opts.batchNormalization, net.layers(end) = [] ; end
 end
