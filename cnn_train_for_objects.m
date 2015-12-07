@@ -264,7 +264,7 @@ for t=1:opts.batchSize:numel(subset)
  
   speed = n/time ;
   fprintf('%.1f Hz%s\n', speed) ;
-  fprintf(' / n: %.3g / error:%.3g', n, error(2)) ;
+  fprintf(' / n: %.3g / obj:%.3g', n, stats(2)/n) ;
   fprintf(' [%d/%d]', numDone, batchSize);
   fprintf('\n') ;
 

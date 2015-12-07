@@ -70,7 +70,8 @@ function label = getLabel(varargin)
   LABEL_SIZE = 175;
   label = zeros(LABEL_SIZE, 1);
   for var = varargin
-    label(str2double(var{1,1}) + 1) = 100; % matlab index
+    label(str2double(var{1,1}) + 1) = ...
+      label(str2double(var{1,1}) + 1) + 1; % matlab index
   end
 end
 
