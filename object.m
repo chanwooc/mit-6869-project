@@ -86,8 +86,8 @@ function object(varargin)
   fn = getBatchSimpleNNWrapper(bopts);
 %   [net,info] = cnn_train_for_objects(net, imdb, fn, opts.train, ...
 %                                      'conserveMemory', true);
-  [net,info] = cnn_train(net, imdb, fn, opts.train, ...
-                         'conserveMemory', true);
+  [net,info] = cnn_train_for_objects2(net, imdb, fn, opts.train, ...
+                                      'conserveMemory', true);
   
 end
 
