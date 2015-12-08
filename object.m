@@ -1,6 +1,6 @@
 function object(varargin)
   run(fullfile(fileparts(mfilename('fullpath')), ...
-    '..','matconvnet', 'matlab', 'vl_setupnn.m'));
+    '..','matconvnet-1.0-beta16', 'matlab', 'vl_setupnn.m'));
 
   NUM_AUGMENTS = 1;
 

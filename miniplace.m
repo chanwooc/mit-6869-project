@@ -4,7 +4,7 @@ function miniplace(varargin)
 %   VGG-VD-16, and VGG-VD-19 architectures on ImageNet data.
 
 run(fullfile(fileparts(mfilename('fullpath')), ...
-  '..','matconvnet', 'matlab', 'vl_setupnn.m')) ;
+  '..','matconvnet-1.0-beta16', 'matlab', 'vl_setupnn.m')) ;
 
 NUM_AUGMENTS = 1 ;
 AUG_METHOD = 'f25' ; % 'stretch'
