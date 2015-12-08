@@ -2,7 +2,7 @@ function net = object_init(varargin)
 
   % General options
   opts.scale = 100 ;
-  opts.weightDecay = 0.0005 ;
+  opts.weightDecay = 0.005 ;
   %opts.weightInitMethod = 'xavierimproved' ;
   opts.weightInitMethod = 'gaussian' ;
   opts.batchNormalization = false ;
@@ -64,7 +64,7 @@ function weights = init_weight(opts, h, w, in, out, type)
   end
 end
 
-function net = add_fc(net, name, size, stride, pad)
+function net = add_pool(net, name, size, stride, pad)
   net.layers{end+1} = struct('type', 'pool', ...
                              'name', sprintf('pool%s', name), ...
                              'method', 'max', ...
@@ -97,11 +97,11 @@ function net = alexnet_object(net, opts)
 
   net = add_block(net, opts, '1', 7, 7, 3, 64, 4, 0) ;
   net = add_norm(net, opts, '1') ;
-  net = add_fc(net, '1', 3, 2, 0);
+  net = add_pool(net, '1', 3, 2, 0);
 
   net = add_block(net, opts, '2', 5, 5, 32, 128, 1, 2) ;
   net = add_norm(net, opts, '2') ;
-  net = add_fc(net, '2', 3, 2, 0);
+  net = add_pool(net, '2', 3, 2, 0);
 
 %   net = add_block(net, opts, '3', 3, 3, 128, 192, 1, 1) ;
 %   net = add_block(net, opts, '4', 3, 3, 96, 128, 1, 1) ;

@@ -33,8 +33,8 @@ opts.backPropDepth = +inf ;
 opts.sync = false ;
 opts.prefetch = false ;
 opts.cudnn = true ;
-opts.weightDecay = 0.0005 ;
-opts.momentum = 0.9 ;
+opts.weightDecay = 0.005 ;
+opts.momentum = 0.9 ; %0.9
 opts.errorFunction = 'multiclass' ;
 % opts.errorFunction = 'binary';
 opts.errorLabels = {} ;
@@ -283,7 +283,7 @@ for t=1:opts.batchSize:numel(subset)
 
     % accumulate training errors
     error = sum([error, [...
-      sum(sum(double(gather(res(end).x)))) ;
+      sum(sum(double(gather(res(end-1).x)))) ;
       reshape(opts.errorFunction(opts, labels, res),[],1) ; ]],2) ;
     numDone = numDone + numel(batch) ;
   end
