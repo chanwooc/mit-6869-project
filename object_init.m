@@ -12,7 +12,8 @@ function net = object_init(varargin)
   net.normalization.imageSize = [115, 115, 3] ;
   net = alexnet_object(net, opts); % NOTE: NO softmax
 %   net.layers{end+1} = struct('type', 'softmaxloss', 'name', 'loss') ;
-
+  net.layers{end+1} = struct('type', 'euclideanloss', 'name', 'loss');
+                             
   net.normalization.border = 128 - net.normalization.imageSize(1:2) ;
 
   net.normalization.interpolation = 'bicubic' ;

@@ -192,7 +192,7 @@ end
 % -------------------------------------------------------------------------
 function err = error_multiclass(opts, labels, res)
 % -------------------------------------------------------------------------
-predictions = gather(res(end).x) ;
+predictions = gather(res(end-1).x) ;
 [~,predictions] = sort(predictions, 3, 'descend') ;
 
 % be resilient to badly formatted labels
