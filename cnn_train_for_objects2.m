@@ -195,36 +195,10 @@ function err = error_multiclass(opts, labels, res)
 predictions = gather(res(end-1).x) ;
 
 if ~isempty(predictions)
-  [~,predictions] = sort(predictions, 3, 'descend') ;
-
-  % be resilient to badly formatted labels
-  if numel(labels) == size(predictions, 4)
-    labels = reshape(labels,1,1,1,[]) ;
-  end
-
-  % skip null labels
-  mass = single(labels(:,:,1,:) > 0) ;
-  if size(labels,3) == 2
-    % if there is a second channel in labels, used it as weights
-    mass = mass .* labels(:,:,2,:) ;
-    labels(:,:,2,:) = [] ;
-  end
-
-  % error = ~bsxfun(@eq, predictions, labels) ;
-  error = reshape(predictions, size(labels, 1), size(labels, 2)) - labels ;
-  err = sum(sum(mass .* error)) ;
+  pred_re = reshape(predictions, size(labels, 1), size(labels, 2));
+  err = sum(sum((pred_re - labels) .^ 2));
 else
-  predictions = gather(res(end).x);
-
-  % skip null labels
-  mass = single(labels(:,:,1,:) > 0) ;
-  if size(labels,3) == 2
-    % if there is a second channel in labels, used it as weights
-    mass = mass .* labels(:,:,2,:) ;
-    labels(:,:,2,:) = [] ;
-  end
-
-  err = predictions - sum(sum(mass .* labels));
+  err = gather(res(end).x);
 end
 
 % -------------------------------------------------------------------------
