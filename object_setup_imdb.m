@@ -73,8 +73,9 @@ function label = getLabel(varargin)
     label(str2double(var{1,1}) + 1) = ...
       label(str2double(var{1,1}) + 1) + 1; % matlab index
   end
-  
-  label = label * 100;
+
+  % normalization
+  label = label / sum(label);
 end
 
 function fileList = getAllFiles(dirName)
