@@ -95,7 +95,7 @@ function net = alexnet_object(net, opts)
 
   net.layers = {} ;
 
-  net = add_block(net, opts, '1', 7, 7, 3, 64, 2, 0) ;
+  net = add_block(net, opts, '1', 7, 7, 3, 64, 4, 0) ;
   net = add_norm(net, opts, '1') ;
   net = add_fc(net, '1', 3, 2, 0);
 
@@ -103,9 +103,9 @@ function net = alexnet_object(net, opts)
   net = add_norm(net, opts, '2') ;
   net = add_fc(net, '2', 3, 2, 0);
 
-  net = add_block(net, opts, '3', 3, 3, 128, 192, 1, 1) ;
-  net = add_block(net, opts, '4', 3, 3, 96, 128, 1, 1) ;
-  net = add_fc(net, '3', 3, 2, 0);
+%   net = add_block(net, opts, '3', 3, 3, 128, 192, 1, 1) ;
+%   net = add_block(net, opts, '4', 3, 3, 96, 128, 1, 1) ;
+%   net = add_fc(net, '3', 3, 2, 0);
 
   net = add_block(net, opts, '5', 6, 6, 128, 1024, 1, 0) ;
   net = add_dropout(net, opts, '5') ;
