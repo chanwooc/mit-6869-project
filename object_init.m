@@ -3,7 +3,6 @@ function net = object_init(varargin)
   % General options
   opts.scale = 100 ;
   opts.weightDecay = 0.005 ;
-  %opts.weightInitMethod = 'xavierimproved' ;
   opts.weightInitMethod = 'gaussian' ;
   opts.batchNormalization = false ;
   opts = vl_argparse(opts, varargin) ;
@@ -11,11 +10,9 @@ function net = object_init(varargin)
   % Define layers
   net.normalization.imageSize = [115, 115, 3] ;
   net = alexnet_object(net, opts); % NOTE: NO softmax
-%   net.layers{end+1} = struct('type', 'softmaxloss', 'name', 'loss') ;
   net.layers{end+1} = struct('type', 'euclideanloss', 'name', 'loss');
-                             
-  net.normalization.border = 128 - net.normalization.imageSize(1:2) ;
 
+  net.normalization.border = 128 - net.normalization.imageSize(1:2) ;
   net.normalization.interpolation = 'bicubic' ;
   net.normalization.averageImage = [] ;
   net.normalization.keepAspect = true ;
@@ -95,7 +92,7 @@ function net = alexnet_object(net, opts)
 
   net.layers = {} ;
 
-  net = add_block(net, opts, '1', 7, 7, 3, 64, 4, 0) ;
+  net = add_block(net, opts, '1', 7, 7, 3, 64, 2, 0) ;
   net = add_norm(net, opts, '1') ;
   net = add_pool(net, '1', 3, 2, 0);
 
@@ -103,9 +100,9 @@ function net = alexnet_object(net, opts)
   net = add_norm(net, opts, '2') ;
   net = add_pool(net, '2', 3, 2, 0);
 
-%   net = add_block(net, opts, '3', 3, 3, 128, 192, 1, 1) ;
-%   net = add_block(net, opts, '4', 3, 3, 96, 128, 1, 1) ;
-%   net = add_fc(net, '3', 3, 2, 0);
+  net = add_block(net, opts, '3', 3, 3, 128, 192, 1, 1) ;
+  net = add_block(net, opts, '4', 3, 3, 96, 128, 1, 1) ;
+  net = add_pool(net, '3', 3, 2, 0);
 
   net = add_block(net, opts, '5', 6, 6, 128, 1024, 1, 0) ;
   net = add_dropout(net, opts, '5') ;
@@ -114,6 +111,7 @@ function net = alexnet_object(net, opts)
   net = add_dropout(net, opts, '6') ;
 
   net = add_block(net, opts, '7', 1, 1, 1024, LABEL_SIZE, 1, 0) ;
-%   net.layers(end) = [] ;
+  net.layers(end) = [] ;
+
   if opts.batchNormalization, net.layers(end) = [] ; end
 end

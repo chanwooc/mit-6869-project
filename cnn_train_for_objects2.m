@@ -316,17 +316,12 @@ for t=1:opts.batchSize:numel(subset)
   speed = n/time ;
   fprintf('%.1f Hz%s\n', speed) ;
 
-  fprintf(' obj:%.3g', stats(2)/n) ;
+  fprintf(' sum_predicted:%.3g', stats(2)/n) ;
   for i=1:numel(opts.errorLabels)
     fprintf(' %s:%.3g', opts.errorLabels{i}, stats(i+2)/n) ;
   end
   fprintf(' [%d/%d]', numDone, batchSize);
   fprintf('\n') ;
-
-  % debug info
-  if opts.plotDiagnostics && numGpus <= 1
-    figure(2) ; vl_simplenn_diagnose(net,res) ; drawnow ;
-  end
 end
 
 if nargout > 2

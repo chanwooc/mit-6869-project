@@ -7,7 +7,6 @@ function object(varargin)
   opts.dataDir = fullfile(fileparts(mfilename('fullpath')),'data');
   opts.batchNormalization = false;
   opts.weightInitMethod = 'gaussian';
-%   opts.weightInitMethod = 'xavierimproved';
   [opts, varargin] = vl_argparse(opts, varargin);
 
   opts.expDir = fullfile('data', 'object');
