@@ -83,10 +83,8 @@ function object(varargin)
   useGpu = numel(opts.train.gpus) > 0;
 
   fn = getBatchSimpleNNWrapper(bopts);
-%   [net,info] = cnn_train_for_objects(net, imdb, fn, opts.train, ...
-%                                      'conserveMemory', true);
-  [net,info] = cnn_train_for_objects2(net, imdb, fn, opts.train, ...
-                                      'conserveMemory', true);
+  [net,info] = cnn_train_multilabels(net, imdb, fn, opts.train, ...
+                                     'conserveMemory', true);
   
 end
 
